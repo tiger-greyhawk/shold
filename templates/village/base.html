@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>stronghold.intercommunion.ru</title>
+</head>
+<body>
+{% if user.is_authenticated %}
+    Вы вошли как {{ user.username }}<br>
+    <a href='/accounts/logout/'>logout</a>
+
+{% else %}
+<a href='/accounts/login/'>login</a> / <a href='/accounts/register/'>registration</a>
+{% endif %}
+</body>
+</html>

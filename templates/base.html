@@ -11,7 +11,7 @@
     <div id="container">
         <!-- Header -->
         <div id="header">
-            {% if user.is_active and user.is_staff %}
+            {% if user.is_active and user.is_authenticated %}
                 <div id="user-tools">
                     {% trans 'Welcome,' %}
                     <strong>{% firstof user.get_short_name user.get_username %}</strong>.
@@ -19,9 +19,12 @@
                         {% if user.has_usable_password %}
                         <a href="{% url 'account:password_change' %}">{% trans 'Change password' %}</a> /
                         {% endif %}
-                        <a href="{% url 'account:logout' %}">{% trans 'Log out' %}</a>
+                        <a href="{% url 'account:logout' %}">{% trans 'Log out' %}</a> /
+                        <a href="{% url 'account:profile' %}">{% trans 'Profile' %}</a>
                     {% endblock %}
                 </div>
+            {% else %}
+                Welcome guest
             {% endif %}
             {% block nav-global %}{% endblock %}
         </div>
@@ -50,4 +53,5 @@
         <!-- END Content -->
 
     </div>
+<a href='/villages/attack_from_user/'>Calculate time from user</a>
 </body>

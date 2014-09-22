@@ -4,7 +4,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from village.models import Village
-from village.views import AddVillageView, InitVillagesView, calculate_distance, calculate_time
+from village.views import AddVillageView, InitVillagesView, calculate_distance, calculate_time, calculate_attacks, get_attack_from_user
 
 
 urlpatterns = patterns('',
@@ -14,4 +14,6 @@ urlpatterns = patterns('',
     url(r'^init/$', login_required(InitVillagesView.as_view())),
     url(r'^distance/(?P<a>\d+)/(?P<b>\d+)/$', calculate_distance),
     url(r'^calculate_time/', calculate_time),
+    url(r'^calculate_attacks/', calculate_attacks),
+    url(r'^attack_from_user/', get_attack_from_user),
 )

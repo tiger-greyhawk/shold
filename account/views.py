@@ -4,11 +4,41 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.template import context
 from django.template.response import TemplateResponse
-
+from forms import UserForm
+from models import  MyProfile
 
 @login_required
 def profile(request):
-    return TemplateResponse(request, "registration/profile.html", {"user": request.user})
+#    id = request.user.id
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+#            speed_army = form.cleaned_data['speed_army']
+#            speed_captain = form.cleaned_data['speed_captain']
+#            id = request.user.id
+            form.save()
+            return TemplateResponse(request, "registration/profile.html", {"user": request.user, 'form':form})
+    else:
+        id = request.user.id
+        try: #MyProfile.objects.get(id=int(id))
+
+            speed_army = MyProfile.objects.get(id=int(id)).speed_army
+            speed_captain = MyProfile.objects.get(id=int(id)).speed_captain
+            speed_merchant = MyProfile.objects.get(id=int(id)).speed_merchant
+            speed_monk = MyProfile.objects.get(id=int(id)).speed_monk
+            form = UserForm(initial={'id': id,
+                                     'speed_army': speed_army,
+                                     'speed_captain': speed_captain,
+                                     'speed_merchant': speed_merchant,
+                                     'speed_monk': speed_monk})
+        except:
+
+            form = UserForm(initial={'id': id})
+
+#    def form_valid(self, form):
+#        form.save()
+#        return super(profile, self).form_valid(form)
+    return TemplateResponse(request, "registration/profile.html", {"user": request.user, 'form':form})
 
 
 def change_password(request):

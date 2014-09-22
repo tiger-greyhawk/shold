@@ -1,4 +1,16 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+
 {% block content %}
 <p>Username: {{ user.username }}</p>
-<p>Password: {{ user.password }}</p>
+
+<form method="post" action="">
+    {% csrf_token %}
+    <table>
+        <tbody>
+            {{ form.as_table }}
+        </tbody>
+    </table>
+    <input type="submit"/>
+</form>
 {% endblock %}

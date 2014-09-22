@@ -5,6 +5,8 @@
     <h1>Add a village</h1>
     <form method="post" action="">
         {% csrf_token %}
+        <p>
+
         <table>
             <tbody>
                 {{ form.as_table }}
@@ -13,5 +15,7 @@
         <input type="submit"/>
     </form>
     <br>
-    <a href="/villages/calculate_time/">Calculate time between knowing villages</a>
+
+    <br>
+
 {% endblock %}

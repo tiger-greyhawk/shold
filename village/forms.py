@@ -1,6 +1,8 @@
 import re
 
+from django.contrib.auth.models import User
 from django import forms
+from django.forms.widgets import RadioSelect
 from django.utils.translation import ugettext_lazy as _
 
 from village.models import Village, calculate_villages
@@ -8,9 +10,10 @@ from village.utils import get_fourth_point, get_distance
 
 
 DISTANCE_REGEX = '(:?(:?(?P<hours>\d+)\:)?(?P<minutes>\d+)\:)?(?P<seconds>\d+)'
-
+#SPEED=(('full','Army full speed'),('full_cap','Captain full speed'),('mini','Army minimal speed'),('mini_cap','Captain minimal speed'))
 
 class CreateVillageForm(forms.Form):
+#    speed_army = forms.ChoiceField(widget=RadioSelect, choices=SPEED)
     name = forms.RegexField(label=_("village name"), max_length=128,
                             regex=r'^[\w.@+-]+$',
                             help_text=_("required, 128 characters or fewer, letters, digits and "
@@ -19,13 +22,8 @@ class CreateVillageForm(forms.Form):
                                 'invalid': _("This value may contain only letters, numbers and "
                                              "@/./+/-/_ characters.")})
 
-    id_id = forms.RegexField(label=_("village id"), max_length=12,
-                            regex=r'^[\d]+$',
-                            help_text=_("required, 12 characters or fewer, digits only."),
-                            error_messages={
-                                'invalid': _("This value may contain only numbers characters.")})
-
-
+    id = forms.IntegerField(label=_("village id"),
+                            help_text=_("required, 12 characters or fewer, digits only."))
 
     a = forms.ModelChoiceField(queryset=Village.objects.all(), label=_('first village'), required=True) # , error_messages={'invalid': _('must have')}
 
@@ -62,7 +60,7 @@ class CreateVillageForm(forms.Form):
         try:
             point = get_fourth_point((a.x, a.y), (b.x, b.y), (c.x, c.y),
                                      cleaned_data['toa'], cleaned_data['tob'], cleaned_data['toc'])
-            cleaned_data['village'] = Village(name=cleaned_data['name'], x=point[0], y=point[1])
+            cleaned_data['village'] = Village(id=cleaned_data['id'], name=cleaned_data['name'], x=point[0], y=point[1])
         except ValueError:
             raise forms.ValidationError(_('village position cannot be calculated, please, verify source data'))
         return cleaned_data
@@ -72,8 +70,11 @@ class CreateVillageForm(forms.Form):
 
 
 class InitVillagesForm(forms.Form):
+    a_id = forms.IntegerField(label=_('first village id'), required=True)
     a = forms.CharField(label=_('first village name'), max_length=128, required=True)
+    b_id = forms.IntegerField(label=_('second village id'), required=True)
     b = forms.CharField(label=_('second village name'), max_length=128, required=True)
+    c_id = forms.IntegerField(label=_('third village id'), required=True)
     c = forms.CharField(label=_('third village name'), max_length=128, required=True)
 
     ab = forms.RegexField(label=_('time from first to second village'), regex=DISTANCE_REGEX,
@@ -99,6 +100,7 @@ class InitVillagesForm(forms.Form):
         cleaned_data = super(InitVillagesForm, self).clean()
         try:
             villages = calculate_villages(cleaned_data['a'], cleaned_data['b'], cleaned_data['c'],
+                                          cleaned_data['a_id'], cleaned_data['b_id'], cleaned_data['c_id'],
                                           cleaned_data['ab'], cleaned_data['bc'], cleaned_data['ca'], )
             cleaned_data['villages'] = villages
         except ValueError:
@@ -132,6 +134,60 @@ class CalculateTimeForm(forms.Form):
 
 #    def save(self):
 #        self.cleaned_data['village'].save()
+
+class AttackFromUserForm(forms.Form):
+
+    from_user = forms.ModelChoiceField(queryset=User.objects.all(), label=_('user'))
+
+    def clean(self):
+        cleaned_data = super(AttackFromUserForm, self).clean()
+        from_user = cleaned_data['from_user']
+#        from_user = Village.owner.get(id=int(from_user))
+#        from_user = owner.Village.get(id=int(from_user))
+#        id_attack_village = (cleaned_data['id_attack_village'])
+#        id_attack_village = cleaned_data['id_attack_village']
+        return cleaned_data
+
+
+
+
+class CalculateAttacksForm(forms.Form):
+    id_village = forms.RegexField(label=_("village id"), max_length=12,
+                            regex=r'^[\d]+$',
+                            help_text=_("Village must be in BD. Required, 12 characters or fewer, digits only."),
+                            error_messages={
+                                'invalid': _("This value may contain only numbers characters.")})
+#    userfor = forms.ModelChoiceField(queryset=User.objects.all(), label=_('user'))
+    a = forms.ModelChoiceField(queryset=Village.objects.all(), label=_('first village'), required=True)
+    b = forms.ModelChoiceField(queryset=Village.objects.all(), label=_('second village'), required=True)
+#    dict = forms.data.values()
+#    b = forms.Form.data[2]
+    distance_a = None
+    distance_b = None
+
+#    id_attack_village = None
+    def clean(self):
+        cleaned_data = super(CalculateAttacksForm, self).clean()
+        a = cleaned_data['a']
+        a = Village.objects.get(id=int(a))
+        b = cleaned_data['b']
+        b = Village.objects.get(id=int(b))
+        id_village = (cleaned_data['id_village'])
+        id_attack_village = Village.objects.get(id=int(id_village))
+#        id_attack_village = (cleaned_data['id_attack_village'])
+#        id_attack_village = cleaned_data['id_attack_village']
+        try:
+#            id_attack_village = Village.objects.get(id_id='id_village')
+            distance_a = get_distance((a.x, a.y), (id_attack_village.x, id_attack_village.y))
+            distance_b = get_distance((b.x, b.y), (id_attack_village.x, id_attack_village.y))
+
+
+        except ValueError:
+            raise forms.ValidationError(_('one or more village have not right coord, or not present in BD, please, verify source data'))
+        return cleaned_data
+
+
+
 
 
 def parse_distance_value(self, field):

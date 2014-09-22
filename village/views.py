@@ -4,10 +4,10 @@ import datetime
 from django.http import HttpResponse
 from django.views.generic import FormView
 
-from village.forms import InitVillagesForm, CreateVillageForm, format_distance, CalculateTimeForm
+from village.forms import InitVillagesForm, CreateVillageForm, format_distance, CalculateTimeForm, CalculateAttacksForm, AttackFromUserForm
 from django.template.response import TemplateResponse
 from village.models import Village
-from village.utils import get_distance
+from village.utils import get_distance, seconds_to_strtime_and_more
 
 
 class AddVillageView(FormView):
@@ -64,6 +64,90 @@ def calculate_time(request):
         form = CalculateTimeForm()
 
     return TemplateResponse(request, 'village/calculate_time.html', {'form': form, 'distance':distance})
+
+
+def get_attack_from_user(request):
+#    from_user = None
+    if request.method == 'POST':
+        form = AttackFromUserForm(request.POST)
+
+        if form.is_valid():
+            from_user = form.cleaned_data['from_user']
+            from_user = from_user.village_set.all()
+
+#            from_user = Village.owner(id=int(from_user.id))
+#            from_user = owner.Village.all()
+#            return calculate_attacks(from_user.village_set.all)
+            return TemplateResponse(request, 'village/attack_from_user.html', {'form':form, 'from_user':from_user})
+        else:
+            from_user = None
+            return TemplateResponse(request, 'village/attack_from_user.html', {'form': form, 'from_user':from_user})
+
+    else:
+#        from_user = None
+        form = AttackFromUserForm()
+    from_user = None
+#    distance_b = None
+#    id_village = None
+    return TemplateResponse(request, 'village/attack_from_user.html', {'form': form, 'from_user':from_user})
+
+
+def calculate_attacks(request):
+
+    if request.method == 'POST':
+
+        form = CalculateAttacksForm(request.POST)
+        dict = form.data.copy()
+        dict = dict.dict()
+        a = {}
+        x = 0;
+        id_village = dict.pop('id_village')
+        id_attack_village = Village.objects.get(id=int(id_village))
+        distance_a = {}
+        from_a = ()
+        del dict['csrfmiddlewaretoken']
+        dict = dict.values()
+        while x < len(dict):
+#            a[x] = dict[x]
+            a[x] = Village.objects.get(id=int(dict[x]))
+            distance_a[x] = get_distance((a[x].x, a[x].y), (id_attack_village.x, id_attack_village.y))
+#            distance_b = get_distance((b.x, b.y), (id_attack_village.x, id_attack_village.y))
+            distance_a[x] = a[x].name + ' :    ' + seconds_to_strtime_and_more(distance_a[x])
+#            distance_b = seconds_to_strtime_and_more(distance_b)
+#            from_a[x] = ((a[x].name) +'( '+ str(a[x].id) +' )  :')
+            x = x+1
+#            from_b = (b.name +'( '+ str(b.id) +' )  :')
+#        b = dict[2]
+#        b = Village.objects.get(id=int(b))
+
+#        b = form.data[2]
+#        distance=(request.POST['distance'])
+#        if form.is_valid():
+#            a = form.cleaned_data['a']
+#            a = Village.objects.get(id=int(a))
+#            b = form.cleaned_data['b']
+#            b = Village.objects.get(id=int(b))
+#            id_village = form.cleaned_data['id_village']
+#            id_attack_village = Village.objects.get(id=int(id_village))
+#            id_attack_village = form.cleaned_data['id_attack_village']
+#            form.save()
+#            village = form.cleaned_data['village']
+#            distance = distance.cleaned_data['distance']
+
+#            distance = datetime.datetime.utcfromtimestamp(distance_a).strftime('%H:%M:%S')
+        return TemplateResponse(request, 'village/calculate_attacks.html', {'form':form, 'from_a':from_a,
+                                        'distance_a':distance_a, 'a':a,})
+
+    else:
+
+        form = CalculateAttacksForm()
+    distance_a = None
+    distance_b = None
+    id_village = None
+    return TemplateResponse(request, 'village/calculate_attacks.html', {'form': form, 'distance_a':distance_a, 'distance_b':distance_b, 'id_village':id_village})
+
+
+
 
 def calculated(request, distance):
 #    village = Village.objects.get(pk=village_id)

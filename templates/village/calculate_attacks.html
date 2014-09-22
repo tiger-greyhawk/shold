@@ -1,0 +1,28 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>Calculate time between many villages</h1>
+
+
+<form method="post" action="">
+    {% csrf_token %}
+    <table>
+        <tbody>
+{% comment %}            {{ form.as_table }} {% endcomment %}
+        </tbody>
+    </table>
+{% comment %}    <input type="submit"/> {% endcomment %}
+
+</form>
+        {% for key_1, value_1 in distance_a.items %}
+        {{ value.name }}&nbsp;&nbsp;&nbsp;        {{ value_1 }} <br>
+        {% endfor %}
+
+    <br>
+
+{% comment %}    {{ from_b }}&nbsp;&nbsp;&nbsp;{{ distance_b }} {% endcomment %}
+<br><br><br><br>
+
+<a href="/villages/add/">Add new village to BD</a>
+{% endblock %}

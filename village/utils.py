@@ -1,5 +1,5 @@
 import logging
-import math
+import math, datetime
 
 DEFAULT_EPSILON = 0.001
 logger = logging.getLogger(__name__)
@@ -117,3 +117,14 @@ def get_fourth_point(a, b, c, ad, bd, cd, epsilon=DEFAULT_EPSILON):
 #     print (x1 - intersection[0]) ** 2 + (y1 - intersection[1]) ** 2, r1 ** 2
 #     print (x2 - intersection[0]) ** 2 + (y2 - intersection[1]) ** 2, r2 ** 2
 # print(get_third_point((0, 0), (1, 0), (0, 0), 1, math.sqrt(2), 1))
+
+
+def seconds_to_strtime_and_more(distance):
+    distanceX1 = 'X1 = '+str(datetime.datetime.utcfromtimestamp(distance).strftime('%H:%M:%S'))
+    distanceX2 = ',  X2 = '+str(datetime.datetime.utcfromtimestamp(distance//2).strftime('%H:%M:%S'))
+    distanceX3 = ',  X3 = '+str(datetime.datetime.utcfromtimestamp(distance//3).strftime('%H:%M:%S'))
+    distanceX4 = ',  X4 = '+str(datetime.datetime.utcfromtimestamp(distance//4).strftime('%H:%M:%S'))
+    distanceX5 = ',  X5 = '+str(datetime.datetime.utcfromtimestamp(distance//5).strftime('%H:%M:%S'))
+    distanceX6 = ',  X6 = '+str(datetime.datetime.utcfromtimestamp(distance//6).strftime('%H:%M:%S'))
+    distance = distanceX1 + distanceX2 + distanceX3 + distanceX4 + distanceX5 + distanceX6
+    return distance

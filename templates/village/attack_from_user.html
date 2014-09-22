@@ -1,0 +1,32 @@
+{% extends "base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>Calculate time between many villages</h1>
+
+<form method="post" action="">
+    {% csrf_token %}
+    <table>
+        <tbody>
+            {{ form.as_table }}
+        </tbody>
+    </table>
+    <input type="submit"/>
+</form>
+<form method="post" action="/villages/calculate_attacks/">
+<input type='text' name='id_village' value='33110'> - target
+<br>
+{% csrf_token %}
+
+{% for i in from_user %}
+
+   <input type='checkbox' name='{{ i.id }}' value='{{ i.id }}'> {{ i }}&nbsp;&nbsp;&nbsp;
+
+    <br>
+{% endfor %}
+<input type='submit' value='calculate time'>
+<br><br><br><br>
+
+</form>
+<a href="/villages/add/">Add new village to BD</a>
+{% endblock %}
